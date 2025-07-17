@@ -375,15 +375,15 @@
       const form = document.getElementById("cadastroForm");
 
       form.addEventListener("submit", async function (event) {
-        event.preventDefault();
+  event.preventDefault();
 
-        if (!validarCPF(cpfInput.value)) {
-          alert("CPF inválido. Por favor, verifique e tente novamente.");
-          cpfInput.focus();
-          return;
-        }
+  if (!validarCPF(cpfInput.value)) {
+    alert("CPF inválido. Por favor, verifique e tente novamente.");
+    cpfInput.focus();
+    return;
+  }
 
-        const dadosTexto = `
+  const dadosTexto = `
 Nome: ${form.nome.value}
 CPF: ${form.cpf.value}
 RG: ${form.rg.value}
@@ -403,63 +403,65 @@ TipoPlano: ${form.tipoPlano.value}
 Plano: ${form.plano.value}
 Indicação: ${form.indicacao.value}
 Vencimento: ${form.vencimento.value}
-Latitude: ${form.latitude.value}
-Longitude: ${form.longitude.value}
+Latitude: ${form.latitude.value || "N/A"}
+Longitude: ${form.longitude.value || "N/A"}
 `.trim();
 
-        const dados = {
-          records: [
-            {
-              fields: {
-                Dados: dadosTexto,
-              },
-            },
-          ],
-        };
+  const dados = {
+    records: [
+      {
+        fields: {
+          Dados: dadosTexto,
+        },
+      },
+    ],
+  };
 
-        try {
-          // Enviar para Airtable
-          const airtableResponse = await fetch(
-            "https://api.airtable.com/v0/appGuthPd5hJXUGYQ/tblXma0echbQ1r0i5",
-            {
-              method: "POST",
-              headers: {
-                Authorization: "Bearer patOhxV7DCQSBAnN4.bebf08508f71dfead6a6ea418933083311a9714e748b59868716bb68d95e02a8",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(dados),
-            }
-          );
+  const chatId = "-4945584051";
+  const botToken = "7782501693:AAHMgA1J_mvPr-toayUMoWb-8WCHQZEjLSI";
+  const mensagemTelegram = encodeURIComponent("Novo cadastro:\n" + dadosTexto);
 
-          if (!airtableResponse.ok) {
-            const errorData = await airtableResponse.json();
-            throw new Error(
-              `Erro Airtable: ${airtableResponse.status} - ${JSON.stringify(
-                errorData
-              )}`
-            );
-          }
+  try {
+    // Envio para Airtable
+    const airtableResponse = await fetch(
+      "https://api.airtable.com/v0/appGuthPd5hJXUGYQ/tblXma0echbQ1r0i5",
+      {
+        method: "POST",
+        headers: {
+          Authorization:
+            "Bearer patOhxV7DCQSBAnN4.bebf08508f71dfead6a6ea418933083311a9714e748b59868716bb68d95e02a8",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dados),
+      }
+    );
 
-          alert("Cadastro enviado com sucesso!");
-          form.reset();
-          infoInstalacaoDiv.style.display = "none";
-          tipoPlanoContainer.style.display = "none";
+    if (!airtableResponse.ok) {
+      const errorData = await airtableResponse.json();
+      throw new Error(
+        `Erro Airtable: ${airtableResponse.status} - ${JSON.stringify(errorData)}`
+      );
+    }
 
-          // Enviar mensagem para Telegram
-          const chatId = "-4945584051";
-          const botToken = "7782501693:AAHMgA1J_mvPr-toayUMoWb-8WCHQZEjLSI";
-          const mensagemTelegram = encodeURIComponent(
-            "Novo cadastro:\n" + dadosTexto
-          );
+    // Envio para Telegram
+    const telegramResponse = await fetch(
+      `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${mensagemTelegram}`
+    );
 
-          await fetch(
-            `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${mensagemTelegram}`
-          );
-        } catch (error) {
-          alert(error.message);
-          console.error(error);
-        }
-      });
+    if (!telegramResponse.ok) {
+      throw new Error("Erro ao enviar para o Telegram");
+    }
+
+    alert("Cadastro enviado com sucesso!");
+    form.reset();
+    infoInstalacaoDiv.style.display = "none";
+    tipoPlanoContainer.style.display = "none";
+  } catch (error) {
+    alert("Erro: " + error.message);
+    console.error(error);
+  }
+});
+
     </script>
   </body>
 </html>
