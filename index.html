@@ -533,17 +533,25 @@
         };
 
         fetch(
-          "https://api.airtable.com/v0/appGuthPd5hJXUGYQ/tblXma0echbQ1r0i5",
-          {
-            method: "POST",
-            headers: {
-              Authorization: "Bearer patOhxV7DCQSBAnN4.bebf08508f71dfead6a6ea418933083311a9714e748b59868716bb68d95e02a8",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(dados),
-          }
-        )
-          .then((resp) => {
+        "https://api.airtable.com/v0/appGuthPd5hJXUGYQ/tblXma0echbQ1r0i5",
+        {
+          method: "POST",
+          headers: {
+            Authorization:
+              "Bearer patOhxV7DCQSBAnN4.bebf08508f71dfead6a6ea418933083311a9714e748b59868716bb68d95e02a8",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            records: [
+              {
+                fields: {
+                  Dados: textoCompleto,
+                },
+              },
+            ],
+          }),
+        }
+      );
             if (!resp.ok)
               throw new Error("Erro ao enviar dados para o Airtable");
             return resp.json();
